@@ -97,7 +97,7 @@
 <meta property="og:url" content="http://sense2008.github.io/2017/12/01/logrus-rotate/index.html">
 <meta property="og:site_name" content="猪爱吃面">
 <meta property="og:description" content="logrus 是一个很不错的日志库，使用简单方便，功能强大。但最近使用时发现它并不支持日志的切分和备份。研究了一下，大多都提到这两种方式：  官方文档里有提到可以通过Hook的模式支持日志rotation，试一下感觉并不方便。Hook方式是通过在某些Hook点增加自定义的逻辑来实现，实际上是在日志写入时自己又写到了一个日志文件里，而且只能使用这个Hook插件自己定义的日志格式，感觉并不方便。 再一">
-<meta property="og:updated_time" content="2017-12-01T03:54:58.928Z">
+<meta property="og:updated_time" content="2017-12-01T06:11:49.795Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="logrus如何自动完成日志切分">
 <meta name="twitter:description" content="logrus 是一个很不错的日志库，使用简单方便，功能强大。但最近使用时发现它并不支持日志的切分和备份。研究了一下，大多都提到这两种方式：  官方文档里有提到可以通过Hook的模式支持日志rotation，试一下感觉并不方便。Hook方式是通过在某些Hook点增加自定义的逻辑来实现，实际上是在日志写入时自己又写到了一个日志文件里，而且只能使用这个Hook插件自己定义的日志格式，感觉并不方便。 再一">
@@ -333,7 +333,7 @@
 <li>再一种方式就是设置一个自定义的io.Writer，接管文件写入的操作，感觉这种方式更优雅一些。<br></li>
 </ul>
 <p>在github上找到一个lumberjack的库，可以实现日志文件的rotation写入。使用方法也很简单。<br></p>
-<p>只要把logrus的io.Writer设置为lumberjack就好。可是自定义日志文件大小和保存时间。<br><figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">log.SetOutput(&amp;lumberjack.Logger&#123;</div><div class="line">			Filename: <span class="string">"test.log"</span>,</div><div class="line">			MaxSize:  <span class="number">200</span>, <span class="comment">// megabytes</span></div><div class="line">			MaxAge:   <span class="number">30</span>,  <span class="comment">//days</span></div><div class="line">		&#125;)</div></pre></td></tr></table></figure></p>
+<p>只要把logrus的io.Writer设置为lumberjack就好。可以自定义日志文件大小和保存时间。<br><figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">log.SetOutput(&amp;lumberjack.Logger&#123;</div><div class="line">			Filename: <span class="string">"test.log"</span>,</div><div class="line">			MaxSize:  <span class="number">200</span>, <span class="comment">// megabytes</span></div><div class="line">			MaxAge:   <span class="number">30</span>,  <span class="comment">//days</span></div><div class="line">		&#125;)</div></pre></td></tr></table></figure></p>
 
       
     </div>
