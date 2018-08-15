@@ -74,7 +74,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="go logger," />
 
 
 
@@ -90,16 +90,17 @@
 
 
 
-<meta name="description" content="MySQL存储引擎Innodb面向OLTP数据库应用  支持事务 行锁设计 支持外键 支持非锁定读（默认读操作不会产生锁） 通过MVCC（多版本并发控制）获得高并发性能 实现了SQL标准的4种隔离级别，默认为REPEATABLE级别 使用next-key-locking的策略来避免幻读（phantom）。 插入缓冲 insert buffer 二次写 double write 自适应哈希索引 ad">
+<meta name="description" content="目的调研Go的三方日志库，选择在微服务Go应用中使用的日志组件 选型主要参考以下因素  热门程度 功能性 性能 易用性 选型比较综合比较zap和logrus都是比较主流的选择     库名 Stars Forks 简介 性能 功能     logrus 8102 1027 Structured, pluggable logging for Go.功能强大，性能也不错 7 功能全面，结构化，Colo">
+<meta name="keywords" content="go logger">
 <meta property="og:type" content="article">
-<meta property="og:title" content="MySQL存储引擎比较">
-<meta property="og:url" content="http://sense2008.github.io/2017/06/05/mysql-arch/index.html">
+<meta property="og:title" content="Go 主流日志库对比测试">
+<meta property="og:url" content="http://sense2008.github.io/2018/08/15/go-logger-benchmark/index.html">
 <meta property="og:site_name" content="猪爱吃面">
-<meta property="og:description" content="MySQL存储引擎Innodb面向OLTP数据库应用  支持事务 行锁设计 支持外键 支持非锁定读（默认读操作不会产生锁） 通过MVCC（多版本并发控制）获得高并发性能 实现了SQL标准的4种隔离级别，默认为REPEATABLE级别 使用next-key-locking的策略来避免幻读（phantom）。 插入缓冲 insert buffer 二次写 double write 自适应哈希索引 ad">
-<meta property="og:updated_time" content="2017-06-05T03:03:14.000Z">
+<meta property="og:description" content="目的调研Go的三方日志库，选择在微服务Go应用中使用的日志组件 选型主要参考以下因素  热门程度 功能性 性能 易用性 选型比较综合比较zap和logrus都是比较主流的选择     库名 Stars Forks 简介 性能 功能     logrus 8102 1027 Structured, pluggable logging for Go.功能强大，性能也不错 7 功能全面，结构化，Colo">
+<meta property="og:updated_time" content="2018-08-15T11:52:32.126Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="MySQL存储引擎比较">
-<meta name="twitter:description" content="MySQL存储引擎Innodb面向OLTP数据库应用  支持事务 行锁设计 支持外键 支持非锁定读（默认读操作不会产生锁） 通过MVCC（多版本并发控制）获得高并发性能 实现了SQL标准的4种隔离级别，默认为REPEATABLE级别 使用next-key-locking的策略来避免幻读（phantom）。 插入缓冲 insert buffer 二次写 double write 自适应哈希索引 ad">
+<meta name="twitter:title" content="Go 主流日志库对比测试">
+<meta name="twitter:description" content="目的调研Go的三方日志库，选择在微服务Go应用中使用的日志组件 选型主要参考以下因素  热门程度 功能性 性能 易用性 选型比较综合比较zap和logrus都是比较主流的选择     库名 Stars Forks 简介 性能 功能     logrus 8102 1027 Structured, pluggable logging for Go.功能强大，性能也不错 7 功能全面，结构化，Colo">
 
 
 
@@ -127,13 +128,13 @@
 
 
 
-  <link rel="canonical" href="http://sense2008.github.io/2017/06/05/mysql-arch/"/>
+  <link rel="canonical" href="http://sense2008.github.io/2018/08/15/go-logger-benchmark/"/>
 
 
 
 
 
-  <title>MySQL存储引擎比较 | 猪爱吃面</title>
+  <title>Go 主流日志库对比测试 | 猪爱吃面</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -262,7 +263,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://sense2008.github.io/2017/06/05/mysql-arch/">
+    <link itemprop="mainEntityOfPage" href="http://sense2008.github.io/2018/08/15/go-logger-benchmark/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="爱吃面的猪">
@@ -279,7 +280,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">MySQL存储引擎比较</h1>
+          <h1 class="post-title" itemprop="name headline">Go 主流日志库对比测试</h1>
         
 
         <div class="post-meta">
@@ -291,8 +292,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-05T10:44:24+08:00">
-                2017-06-05
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-15T19:52:31+08:00">
+                2018-08-15
               </time>
             
 
@@ -326,57 +327,268 @@
       
 
       
-        <h2 id="MySQL存储引擎"><a href="#MySQL存储引擎" class="headerlink" title="MySQL存储引擎"></a>MySQL存储引擎</h2><h2 id="Innodb"><a href="#Innodb" class="headerlink" title="Innodb"></a>Innodb</h2><p>面向OLTP数据库应用</p>
+        <h1 id="目的"><a href="#目的" class="headerlink" title="目的"></a>目的</h1><p>调研Go的三方日志库，选择在微服务Go应用中使用的日志组件</p>
+<p>选型主要参考以下因素</p>
 <ul>
-<li>支持事务</li>
-<li>行锁设计</li>
-<li>支持外键</li>
-<li>支持非锁定读（默认读操作不会产生锁）</li>
-<li>通过MVCC（多版本并发控制）获得高并发性能</li>
-<li>实现了SQL标准的4种隔离级别，默认为REPEATABLE级别</li>
-<li>使用next-key-locking的策略来避免幻读（phantom）。</li>
-<li>插入缓冲 insert buffer</li>
-<li>二次写 double write</li>
-<li>自适应哈希索引 adaptive hash index</li>
-<li>预读 read ahead</li>
-<li>聚集索引  clustered</li>
+<li>热门程度</li>
+<li>功能性</li>
+<li>性能</li>
+<li>易用性</li>
+<li>选型比较<br>综合比较zap和logrus都是比较主流的选择</li>
 </ul>
-<h2 id="MyISAM"><a href="#MyISAM" class="headerlink" title="MyISAM"></a>MyISAM</h2><p>面向OLAP数据库应用</p>
-<ul>
-<li>不支持事务</li>
-<li>表锁设计</li>
-<li>支持全文索引</li>
-<li>缓冲池只缓存索引文件，不缓存数据文件</li>
-<li>MySQL5.0之前默认支持的表大小为4GB</li>
-<li>5.0之后默认支持256TB的单表数据</li>
-</ul>
-<h2 id="NDB"><a href="#NDB" class="headerlink" title="NDB"></a>NDB</h2><ul>
-<li>集群存储引擎，类似于Oracle的RAC集群。</li>
-<li>数据全放在内存中</li>
-</ul>
-<h2 id="Memory"><a href="#Memory" class="headerlink" title="Memory"></a>Memory</h2><ul>
-<li>之前叫HEAP存储引擎</li>
-<li>数据放在内存中</li>
-<li>适合存储数据的临时表</li>
-<li>使用哈希索引</li>
-<li>表锁设计</li>
-<li>并发性能差</li>
-<li>不支持TEXT和BLOB列类型</li>
-</ul>
-<h2 id="Archieve"><a href="#Archieve" class="headerlink" title="Archieve"></a>Archieve</h2><ul>
-<li>只支持INSERT和SELECT</li>
-<li>压缩比 1：10</li>
-<li>适合存储归档数据，如日志信息</li>
-<li>使用行锁</li>
-</ul>
-<h2 id="Maria"><a href="#Maria" class="headerlink" title="Maria"></a>Maria</h2><ul>
-<li>新设计用来代替MyISAM</li>
-<li>支持缓存数据和索引文件</li>
-<li>行锁设计</li>
-<li>提供了MVCC功能</li>
-<li>支持事务和非事务安全选项</li>
-<li>更好的BLOB字符类型处理性能</li>
-</ul>
+<table>
+<thead>
+<tr>
+<th>库名</th>
+<th>Stars</th>
+<th>Forks</th>
+<th>简介</th>
+<th>性能</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>logrus</td>
+<td>8102</td>
+<td>1027</td>
+<td>Structured, pluggable logging for Go.功能强大，性能也不错</td>
+<td>7</td>
+<td>功能全面，结构化，Color terminal support</td>
+</tr>
+<tr>
+<td>zap</td>
+<td>4329</td>
+<td>300</td>
+<td>Blazing fast, structured, leveled logging in Go.  Uber开源的一个日志库</td>
+<td>10</td>
+<td>快速，结构化，分级，能够激活强大的ad-hoc分析, 灵活的仪表板, 其功能超过其他工具ELK, Splunk, 和 Sentry</td>
+</tr>
+<tr>
+<td>go-logging</td>
+<td>1294</td>
+<td>211</td>
+<td>Its output format is customizable and supports different logging backends like syslog, file and memory.</td>
+<td>6</td>
+<td>不支持JSON结构</td>
+</tr>
+<tr>
+<td>zerolog</td>
+<td>1250</td>
+<td>68</td>
+<td>Zero Allocation JSON Logger 性能相当好的日志库</td>
+<td>9</td>
+<td>结构化支持</td>
+</tr>
+<tr>
+<td>seelog</td>
+<td>1169</td>
+<td>197</td>
+<td>原生Go日志库，提供了灵活的异步调度、过滤和格式化</td>
+<td>7</td>
+<td>灵活的异步调度、过滤和格式化</td>
+</tr>
+<tr>
+<td>log15</td>
+<td>766</td>
+<td>95</td>
+<td>Structured, composable logging for Go</td>
+<td>5</td>
+<td>Built-in support for logging to files, streams, syslog, and the network</td>
+</tr>
+<tr>
+<td>go-kit</td>
+<td>10835</td>
+<td>1123</td>
+<td>由于在github上是一整个工具集的项目，所以Stars数不一定能衡量log组件的流行度。</td>
+<td>8</td>
+<td>go-kit是一个微服务工具集合，其中包含有log组件</td>
+</tr>
+</tbody>
+</table>
+<h1 id="Benchmark"><a href="#Benchmark" class="headerlink" title="Benchmark"></a>Benchmark</h1><p>利用go testing的benchmark功能，对列出的三方库进行压力测试，利用testing的Parallel进行并发测试，分别把cpu参数设置为1，2，4进行测试。</p>
+<p>测试脚本： <a href="https://github.com/senses2008/go-logger-benchmark" target="_blank" rel="external">https://github.com/senses2008/go-logger-benchmark</a></p>
+<p>zap的性能很突出，zerolog也符合“Zero Allocation JSON Logger”的定义。</p>
+<h2 id="写文本格式日志"><a href="#写文本格式日志" class="headerlink" title="写文本格式日志"></a>写文本格式日志</h2><table>
+<thead>
+<tr>
+<th>库名</th>
+<th>op time(cpu-1)</th>
+<th>allocs size(cpu-1)</th>
+<th>alloc times(cpu-1)</th>
+<th>op time(cpu-2)</th>
+<th>allocs size(cpu-2)</th>
+<th>alloc count(cpu-2)</th>
+<th>op time(cpu-4)</th>
+<th>allocs size(cpu-4)</th>
+<th>alloc count(cpu-4)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>logrus</td>
+<td>10850 ns/op</td>
+<td>368 B/op</td>
+<td>11 allocs/op</td>
+<td>13538 ns/op</td>
+<td>368 B/op</td>
+<td>11 allocs/op</td>
+<td>13925 ns/op</td>
+<td>368 B/op</td>
+<td>11 allocs/op</td>
+</tr>
+<tr>
+<td>zap</td>
+<td>912 ns/op</td>
+<td>0 B/op</td>
+<td>0 allocs/op</td>
+<td>510 ns/op</td>
+<td>0 B/op</td>
+<td>0 allocs/op</td>
+<td>268 ns/op</td>
+<td>0 B/op</td>
+<td>0 allocs/op</td>
+</tr>
+<tr>
+<td>go-logging</td>
+<td>10143 ns/op</td>
+<td>920 B/op</td>
+<td>15 allocs/op</td>
+<td>13608 ns/op</td>
+<td>920 B/op</td>
+<td>15 allocs/op</td>
+<td>13342 ns/op</td>
+<td>920 B/op</td>
+<td>15 allocs/op</td>
+</tr>
+<tr>
+<td>zerolog</td>
+<td>8294 ns/op</td>
+<td>0 B/op</td>
+<td>0 allocs/op</td>
+<td>10622 ns/op</td>
+<td>0 B/op</td>
+<td>0 allocs/op</td>
+<td>10414 ns/op</td>
+<td>0 B/op</td>
+<td>0 allocs/op</td>
+</tr>
+<tr>
+<td>seelog</td>
+<td>10315 ns/op</td>
+<td>440 B/op</td>
+<td>11 allocs/op</td>
+<td>13015 ns/op</td>
+<td>440 B/op</td>
+<td>11 allocs/op</td>
+<td>12318 ns/op</td>
+<td>440 B/op</td>
+<td>11 allocs/op</td>
+</tr>
+<tr>
+<td>log15</td>
+<td>12184 ns/op</td>
+<td>840 B/op</td>
+<td>14 allocs/op</td>
+<td>16081 ns/op</td>
+<td>840 B/op</td>
+<td>14 allocs/op</td>
+<td>15236 ns/op</td>
+<td>840 B/op</td>
+<td>14 allocs/op</td>
+</tr>
+<tr>
+<td>go-kit</td>
+<td>7289 ns/op</td>
+<td>96 B/op</td>
+<td>2 allocs/op</td>
+<td>9025 ns/op</td>
+<td>96 B/op</td>
+<td>2 allocs/op</td>
+<td>9516 ns/op</td>
+<td>96 B/op</td>
+<td>2 allocs/op</td>
+</tr>
+</tbody>
+</table>
+<h2 id="写Json格式日志"><a href="#写Json格式日志" class="headerlink" title="写Json格式日志"></a>写Json格式日志</h2><table>
+<thead>
+<tr>
+<th>库名</th>
+<th>op time(cpu-1)</th>
+<th>allocs size(cpu-1)</th>
+<th>alloc times(cpu-1)</th>
+<th>op time(cpu-2)</th>
+<th>allocs size(cpu-2)</th>
+<th>alloc count(cpu-2)</th>
+<th>op time(cpu-4)</th>
+<th>allocs size(cpu-4)</th>
+<th>alloc count(cpu-4)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>logrus</td>
+<td>16302 ns/op</td>
+<td>2144 B/op</td>
+<td>32 allocs/op</td>
+<td>20125 ns/op</td>
+<td>2144 B/op</td>
+<td>32 allocs/op</td>
+<td>19650 ns/op</td>
+<td>2144 B/op</td>
+<td>32 allocs/op</td>
+</tr>
+<tr>
+<td>zap</td>
+<td>1159 ns/op</td>
+<td>192 B/op</td>
+<td>1 allocs/op</td>
+<td>630 ns/op</td>
+<td>192 B/op</td>
+<td>1 allocs/op</td>
+<td>372 ns/op</td>
+<td>192 B/op</td>
+<td>1 allocs/op</td>
+</tr>
+<tr>
+<td>zerolog</td>
+<td>9050 ns/op</td>
+<td>0 B/op</td>
+<td>0 allocs/op</td>
+<td>11362 ns/op</td>
+<td>0 B/op</td>
+<td>0 allocs/op</td>
+<td>12227 ns/op</td>
+<td>0 B/op</td>
+<td>0 allocs/op</td>
+</tr>
+<tr>
+<td>log15</td>
+<td>19535 ns/op</td>
+<td>2240 B/op</td>
+<td>32 allocs/op</td>
+<td>23066 ns/op</td>
+<td>2240 B/op</td>
+<td>32 allocs/op</td>
+<td>23577 ns/op</td>
+<td>2240 B/op</td>
+<td>32 allocs/op</td>
+</tr>
+<tr>
+<td>go-kit</td>
+<td>9221 ns/op</td>
+<td>298 B/op</td>
+<td>5 allocs/op</td>
+<td>12312 ns/op</td>
+<td>298 B/op</td>
+<td>24 allocs/op</td>
+<td>15428 ns/op</td>
+<td>298 B/op</td>
+<td>5 allocs/op</td>
+</tr>
+</tbody>
+</table>
 
       
     </div>
@@ -404,6 +616,12 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/go-logger/" rel="tag"># go logger</a>
+          
+        </div>
+      
 
       
         
@@ -413,8 +631,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/05/31/PHP-Frame-vs-Library/" rel="next" title="PHP组件初识">
-                <i class="fa fa-chevron-left"></i> PHP组件初识
+              <a href="/2018/01/08/mutil-go-project-manage/" rel="next" title="如何使用glide管理多个Go项目">
+                <i class="fa fa-chevron-left"></i> 如何使用glide管理多个Go项目
               </a>
             
           </div>
@@ -422,10 +640,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/06/05/Innodb/" rel="prev" title="Innodb">
-                Innodb <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -585,7 +799,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL存储引擎"><span class="nav-number">1.</span> <span class="nav-text">MySQL存储引擎</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Innodb"><span class="nav-number">2.</span> <span class="nav-text">Innodb</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MyISAM"><span class="nav-number">3.</span> <span class="nav-text">MyISAM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NDB"><span class="nav-number">4.</span> <span class="nav-text">NDB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Memory"><span class="nav-number">5.</span> <span class="nav-text">Memory</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Archieve"><span class="nav-number">6.</span> <span class="nav-text">Archieve</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Maria"><span class="nav-number">7.</span> <span class="nav-text">Maria</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#目的"><span class="nav-number">1.</span> <span class="nav-text">目的</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Benchmark"><span class="nav-number">2.</span> <span class="nav-text">Benchmark</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#写文本格式日志"><span class="nav-number">2.1.</span> <span class="nav-text">写文本格式日志</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#写Json格式日志"><span class="nav-number">2.2.</span> <span class="nav-text">写Json格式日志</span></a></li></ol></li></ol></div>
             
 
           </div>
